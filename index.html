@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-W37DGS67');</script>
+<!-- End Google Tag Manager -->
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #1a1a1a;
+      font-family: Arial, sans-serif;
+    }
+    
+    .text-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .character {
+      color: #fff;
+      font-size: 3rem;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W37DGS67"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+  <div class="text-container" id="container"></div>
+
+  <script>
+    const text = "Coming Soon";
+    const container = document.getElementById('container');
+    let characters = [];
+    let currentState = 'stars'; // 'stars', 'revealing', vagy 'text'
+    let pulseCount = 0;
+    const maxPulses = 3;
+    
+    function createCharacters() {
+      container.innerHTML = '';
+      characters = text.split('').map((letter, index) => {
+        const span = document.createElement('span');
+        span.className = 'character';
+        span.textContent = '*';
+        span.dataset.letter = letter;
+        span.style.animation = `pulse 2s infinite ${index * 0.1}s`;
+        container.appendChild(span);
+        return span;
+      });
+    }
+
+    function revealRandomLetter() {
+      const hiddenChars = characters.filter(char => char.textContent === '*');
+      if (hiddenChars.length > 0) {
+        const randomIndex = Math.floor(Math.random() * hiddenChars.length);
+        const charToReveal = hiddenChars[randomIndex];
+        charToReveal.textContent = charToReveal.dataset.letter;
+      }
+    }
+
+    function showFullText() {
+      characters.forEach(char => {
+        char.textContent = char.dataset.letter;
+      });
+    }
+
+    function convertToStars() {
+      characters.forEach(char => {
+        char.textContent = '*';
+      });
+    }
+
+    function startAnimation() {
+      createCharacters();
+      currentState = 'revealing';
+      pulseCount = 0;
+
+      // Reveal letters one by one
+      const revealInterval = setInterval(() => {
+        revealRandomLetter();
+        if (!characters.some(char => char.textContent === '*')) {
+          clearInterval(revealInterval);
+          currentState = 'text';
+          setTimeout(() => {
+            startTextPulsing();
+          }, 0);
+        }
+      }, 300);
+    }
+
+    function startTextPulsing() {
+      showFullText();
+      const firstChar = characters[0];
+      let lastOpacity = window.getComputedStyle(firstChar).opacity;
+      pulseCount = 0;
+      
+      const opacityCheck = setInterval(() => {
+        const currentOpacity = window.getComputedStyle(firstChar).opacity;
+        if (currentOpacity < lastOpacity) {
+          pulseCount++;
+          if (pulseCount >= maxPulses) {
+            clearInterval(opacityCheck);
+            currentState = 'stars';
+            // Várakozás a csillagos rész újraindítása előtt (pl. 5000 ms = 5 másodperc)
+            setTimeout(() => {
+              convertToStars();
+              setTimeout(() => {
+                startStarsPulsing();
+              }, 0);
+            }, 5000); // Itt állíthatod be a várakozási időt (ms-ben)
+          }
+        }
+        lastOpacity = currentOpacity;
+      }, 100);
+    }
+
+    function startStarsPulsing() {
+      let starPulseCount = 0;
+      const firstChar = characters[0];
+      let lastOpacity = window.getComputedStyle(firstChar).opacity;
+      
+      const opacityCheck = setInterval(() => {
+        const currentOpacity = window.getComputedStyle(firstChar).opacity;
+        if (currentOpacity < lastOpacity) {
+          starPulseCount++;
+          if (starPulseCount >= maxPulses) {
+            clearInterval(opacityCheck);
+            setTimeout(startAnimation, 1000);
+          }
+        }
+        lastOpacity = currentOpacity;
+      }, 100);
+    }
+
+    // Start the animation cycle
+    startAnimation();
+  </script>
+</body>
+</html>
